@@ -40,6 +40,7 @@ const NavBar = () => {
             <Link to="/" style={h2Styles}>Home</Link>
             <Link to="/posts" style={h2Styles}>Posts</Link>
             <Link to="/cars" style={h2Styles}>Cars</Link>
+            <Link to="/login" style={h2Styles}>Admin</Link>
         </nav>
     );
     
