@@ -52,60 +52,55 @@ const NavBar = () => {
 
 const Login = () => {
   const navigate = useNavigate();
-  const [correo, setCorreo] = useState('');
-  const [contrasena, setContrasena] = useState('');
+  const [correo_electronico, setCorreo] = useState('');
+  const [contraseña, setContrasena] = useState('');
   const [error, setError] = useState('');
 
+  // Esta función podría ser parte de tu función handleLogin
+// Suponiendo que estás en el contexto del componente Login
+
+const generateClientSideToken = () => {
+    // Ejemplo simple de generación de un token
+    return [...Array(30)].map(() => Math.random().toString(36)[2]).join('');
+  };
+  
   const handleLogin = async (e) => {
     e.preventDefault();
   
+    const contraseña_hash = await hashPassword(contraseña);
+    
+  
     try {
-      const hashedPassword = await hashPassword(contrasena);
-      console.log('Contraseña encriptada:', hashedPassword);
-      // Realizar la solicitud de inicio de sesión
-      const response = await fetch('http://127.0.0.1:8000/login', {
+      const response = await fetch('http://3.129.191.211/api/22944/Login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ correo, contrasena: hashedPassword }),
+        body: JSON.stringify({ correo_electronico: correo_electronico, contraseña_hash: contraseña_hash }),
       });
   
       if (response.ok) {
-        // Si la respuesta es exitosa, redirige al usuario a la página adecuada
+        // Generar un token del lado del cliente (esto es solo para desarrollo)
+        const token = generateClientSideToken();
+  
+        // Guardar el token en el almacenamiento local
+        localStorage.setItem('token', token);
+  
+        // Proceder con la lógica de navegación dependiendo del rol
         const data = await response.json();
-        switch (data.rol) {
-          case 'administrador':
-            navigate('/administrador');
-            break;
-          case 'cliente':
-            navigate('/cliente');
-            break;
-          case 'empleado':
-            navigate('/barista');
-            break;
-          case 'cocinero':
-            navigate('/cocinero');
-            break;
-          case 'mesero':
-            navigate('/mesero');
-            break;
-          // Agrega más casos según sea necesario
-          default:
-            // Maneja otros roles o errores
-            break;
-        }
-      } else if (response.status === 401) {
-        // Si la respuesta es 401 (Unauthorized), muestra un mensaje de error al usuario
-        setError('Credenciales incorrectas');
+        console.log('Datos de usuario:', data);
+        navigate(`/${data.rol}`);
+        // ... resto de tu lógica ...
       } else {
-        // Otros errores del servidor
-        setError('Error en el inicio de sesión');
+        // Manejar errores como credenciales incorrectas o errores del servidor
       }
     } catch (error) {
-      console.error('Error:', error);
+      // Manejar excepciones de la solicitud fetch o la lógica de hashing
     }
   };
+  
+  
+  
   
   const hashPassword = async (password) => {
     const encoder = new TextEncoder();
@@ -114,6 +109,7 @@ const Login = () => {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashedPassword = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
     console.log('Contraseña encriptada:', hashedPassword); 
+    console.log('Correo:', correo_electronico);
     return hashedPassword;
   };
 
@@ -125,11 +121,11 @@ const Login = () => {
           <h1>Login</h1>
           {error && <div className='error'>{error}</div>}
           <div className='input-box'>
-            <input type='email' placeholder='Email' value={correo} onChange={(e) => setCorreo(e.target.value)} required />
+            <input type='email' placeholder='Email' value={correo_electronico} onChange={(e) => setCorreo(e.target.value)} required />
             <FaUser className='icon' />
           </div>
           <div className='input-box'>
-            <input type='password' placeholder='Password' value={contrasena} onChange={(e) => setContrasena(e.target.value)} required />
+            <input type='password' placeholder='Password' value={contraseña} onChange={(e) => setContrasena(e.target.value)} required />
             <FaLock className='icon' />
           </div>
           <button className='button' type='submit'>
