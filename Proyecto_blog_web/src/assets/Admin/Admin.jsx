@@ -5,6 +5,29 @@ import PropTypes from 'prop-types'
 import Logo from '../Home/logo_ferrari.png'
 import { Link, useNavigate } from 'react-router-dom'
 
+const useForm = (initialValues, onSubmit) => {
+  const [values, setValues] = useState(initialValues)
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setValues(prevValues => ({
+      ...prevValues,
+      [name]: value
+    }))
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    onSubmit()
+  }
+
+  return {
+    values,
+    handleChange,
+    handleSubmit
+  }
+}
+
 const useApi = (url) => {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -34,41 +57,27 @@ const useApi = (url) => {
 }
 
 const ModalUpdate = ({ post }) => {
-// Estado para manejar la visibilidad del modal
   const [isOpen, setIsOpen] = useState(false)
 
-  // Función para abrir el modal
-  const openModal = () => {
-    setTitulo(post.titulo)
-    setImagenUrl(post.imagen_url)
-    setContenido(post.contenido)
-    setIsOpen(true)
-  }
+  const openModal = () => setIsOpen(true)
+  const closeModal = () => setIsOpen(false)
 
-  // Función para cerrar el modal
-  const closeModal = () => {
-    setIsOpen(false)
-  }
+  const { values, handleChange, handleSubmit } = useForm({
+    titulo: post.titulo,
+    imagen_url: post.imagen_url,
+    contenido: post.contenido
+  }, () => updatePost(post.id))
 
-  const [titulo, setTitulo] = useState(post.titulo)
-  const [imagen_url, setImagenUrl] = useState(post.imagen_url)
-  const [contenido, setContenido] = useState(post.contenido)
-
-  const handleUpdatePost = async (e) => {
-    e.preventDefault()
+  const updatePost = async () => {
     try {
-      console.log({ titulo, imagen_url, contenido }) // Agrega esto antes del fetch en handleUpdatePost
+      console.log(values) // Antes del fetch para ver los valores actuales que se enviarán
       const response = await fetch(`http://3.129.191.211/api/22944/posts/${post.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({
-          titulo,
-          imagen_url,
-          contenido
-        })
+        body: JSON.stringify(values)
       })
 
       if (response.ok) {
@@ -104,18 +113,18 @@ const ModalUpdate = ({ post }) => {
                             </button>
                         </div>
                         {/* Modal body con el formulario */}
-                        <form className="p-5 w-full flex flex-col items-center" onSubmit={handleUpdatePost}>
+                        <form className="p-5 w-full flex flex-col items-center" onSubmit={handleSubmit}>
                             <div className="w-full">
-                                <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title</label>
-                                <input type="text" name="name" id="name" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter title" required="" onChange={(e) => setTitulo(e.target.value)}></input>
+                                <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title</label>`
+                                <input type="text" name="titulo" id="titulo" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter title" required="" value={values.titulo} onChange={handleChange}></input>
                             </div>
                             <div className="w-full">
                                 <label htmlFor="imagen_url" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Image URL</label>
-                                <input type="text" name="imagen_url" id="imagen_url" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter image URL" required="" onChange={(e) => setImagenUrl(e.target.value)}></input>
+                                <input type="text" name="imagen_url" id="imagen_url" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter image URL" required="" value={values.imagen_url} onChange={handleChange}></input>
                             </div>
                             <div className="w-full">
                                 <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Description</label>
-                                <textarea id="description" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Write product description here" value={contenido} onChange={(e) => setContenido(e.target.value)}></textarea>
+                                <textarea id="contenido" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Write product description here" value={values.contenido} onChange={handleChange}></textarea>
                             </div>
                             <button type="submit" className="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" style={{ margin: '10px 10px 10px 10px' }}>
                                 Add new product
@@ -187,52 +196,38 @@ const ModalDelete = ({ postId, onPostDeleted }) => {
 }
 
 const Modal = () => {
-// Estado para manejar la visibilidad del modal
   const [isOpen, setIsOpen] = useState(false)
 
-  // Función para abrir el modal
-  const openModal = () => {
-    setIsOpen(true)
-  }
+  const openModal = () => setIsOpen(true)
+  const closeModal = () => setIsOpen(false)
 
-  // Función para cerrar el modal
-  const closeModal = () => {
-    setIsOpen(false)
-  }
-
-  const [titulo, setTitulo] = useState('')
-  const [imagenUrl, setImagenUrl] = useState('')
-  const [contenido, setContenido] = useState('')
-
-  const handleInputChange = (e, setter) => setter(e.target.value)
-
-  const handleCreatePost = async (e) => {
-    e.preventDefault() // Evitar recargar la página
+  const createPost = async () => {
     try {
       const response = await fetch('http://3.129.191.211/api/22944/posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Suponiendo que necesitas un token de autorización
           Authorization: `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({
-          titulo,
-          imagen_url: imagenUrl,
-          contenido
-        })
+        body: JSON.stringify(values)
       })
 
       if (response.ok) {
         console.log('Post creado con éxito')
-        // Recargar los posts o manejar la actualización del estado global si es necesario
+        closeModal()
       } else {
-        console.error('Error al crear post', response.statusText)
+        console.error('Error al crear post', await response.json())
       }
     } catch (error) {
       console.error('Error en la red al crear post', error)
     }
   }
+
+  const { values, handleChange, handleSubmit } = useForm({
+    titulo: '',
+    imagen_url: '',
+    contenido: ''
+  }, createPost)
 
   return (
         <>
@@ -255,18 +250,18 @@ const Modal = () => {
                             </button>
                         </div>
                         {/* Modal body con el formulario */}
-                        <form className="p-5 w-full flex flex-col items-center" onSubmit={handleCreatePost}>
+                        <form className="p-5 w-full flex flex-col items-center" onSubmit={handleSubmit}>
                             <div className="w-full">
                                 <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title</label>
-                                <input type="text" name="name" id="name" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter title" required="" value={titulo} onChange={(e) => handleInputChange(e, setTitulo)}></input>
+                                <input type="text" name="titulo" id="titulo" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter title" required="" value={values.titulo} onChange={handleChange}></input>
                             </div>
                             <div className="w-full">
                                 <label htmlFor="imagen_url" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Image URL</label>
-                                <input type="text" name="imagen_url" id="imagen_url" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter image URL" required="" value={imagenUrl} onChange={(e) => handleInputChange(e, setImagenUrl)}></input>
+                                <input type="text" name="imagen_url" id="imagen_url" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter image URL" required="" value={values.imagen_url} onChange={handleChange}></input>
                             </div>
                             <div className="w-full">
-                                <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Description</label>
-                                <textarea id="description" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Write product description here" value={contenido} onChange={(e) => handleInputChange(e, setContenido)}></textarea>
+                                <label htmlFor="contenido" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Description</label>
+                                <textarea name='contenido' id="contenido" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Write product description here" value={values.contenido} onChange={handleChange}></textarea>
                             </div>
                             <button type="submit" className="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" style={{ margin: '10px 10px 10px 10px' }}>
                                 Add new product
