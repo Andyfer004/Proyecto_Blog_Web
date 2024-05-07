@@ -80,9 +80,11 @@ const ModalUpdate = ({ post }) => {
         body: JSON.stringify(values)
       })
 
+      closeModal() // Cierra el modal inmediatamente después de enviar la solicitud
+      window.location.reload()
       if (response.ok) {
         console.log('Post actualizado con éxito')
-        closeModal()
+        window.location.reload() // Recarga la página para ver los cambios
       } else {
         const errorData = await response.json()
         console.error('Error al actualizar post', errorData)
@@ -154,6 +156,7 @@ const ModalDelete = ({ postId, onPostDeleted }) => {
     })
       .then(response => {
         if (response.ok) {
+          window.location.reload()
           closeModal() // Cerrar el modal
           onPostDeleted(postId) // Llamar a la función pasada como prop para manejar la eliminación en el componente padre
         } else {
@@ -212,9 +215,11 @@ const Modal = () => {
         body: JSON.stringify(values)
       })
 
+      closeModal() // Cierra el modal inmediatamente después de enviar la solicitud
+      window.location.reload()
       if (response.ok) {
         console.log('Post creado con éxito')
-        closeModal()
+        window.location.reload() // Recarga la página para ver los cambios
       } else {
         console.error('Error al crear post', await response.json())
       }
@@ -331,7 +336,12 @@ const Loading = () => {
 }
 
 const PostsLoader = () => {
-  const { data: posts, loading, error } = useApi('http://3.129.191.211/api/22944/posts')
+  const [posts, setPosts] = useState(null)
+  const { data, loading, error } = useApi('http://3.129.191.211/api/22944/posts')
+
+  React.useEffect(() => {
+    setPosts(data)
+  }, [data])
 
   if (loading) {
     return <Loading />
