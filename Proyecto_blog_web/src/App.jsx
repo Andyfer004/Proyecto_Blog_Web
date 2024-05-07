@@ -1,12 +1,13 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./assets/Home/home.jsx";
-import Posts from "./assets/posts/post.jsx";
-import Cars from "./assets/cars/cars.jsx";
-import Login from "./assets/Login/Login.jsx";
-import Admin from "./assets/Admin/Admin.jsx";
-import { AuthProvider, ProtectedRoute } from './AuthContext.jsx'; // Importa el AuthProvider y ProtectedRoute correctamente
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Home from './assets/Home/home.jsx'
+import Posts from './assets/posts/post.jsx'
+import Cars from './assets/cars/cars.jsx'
+import Login from './assets/Login/Login.jsx'
+import Admin from './assets/Admin/Admin.jsx'
+import React from 'react'
+import { AuthProvider, ProtectedRoute } from './AuthContext.jsx' // Importa el AuthProvider y ProtectedRoute correctamente
 
-function App() {
+function App () {
   return (
     <AuthProvider>
       <BrowserRouter>
@@ -23,7 +24,7 @@ function App() {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
-  );
+  )
 }
 
-export default App;
+export default App
