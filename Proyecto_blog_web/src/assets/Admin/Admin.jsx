@@ -5,6 +5,34 @@ import PropTypes from 'prop-types'
 import Logo from '../Home/logo_ferrari.png'
 import { Link, useNavigate } from 'react-router-dom'
 
+const useApi = (url) => {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch(url)
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} ${response.statusText}`)
+        }
+        const data = await response.json()
+        setData(data)
+      } catch (error) {
+        setError(error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [url])
+
+  return { data, loading, error }
+}
+
 const ModalUpdate = ({ post }) => {
 // Estado para manejar la visibilidad del modal
   const [isOpen, setIsOpen] = useState(false)
@@ -308,41 +336,7 @@ const Loading = () => {
 }
 
 const PostsLoader = () => {
-  const [posts, setPosts] = React.useState([])
-  const [loading, setLoading] = React.useState(true)
-  const [error, setError] = React.useState(null) // Estado para manejar errores
-
-  React.useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true)
-      try {
-        const response = await fetch('http://3.129.191.211/api/22944/posts')
-
-        if (!response.ok) {
-          // Si la respuesta no es 2xx, considerarlo como un error
-          throw new Error(`Error: ${response.status} ${response.statusText}`)
-        }
-
-        const data = await response.json()
-
-        // Aquí puedes agregar validaciones adicionales sobre el formato de los datos si es necesario
-        if (!Array.isArray(data)) {
-          // Suponiendo que esperas un array de posts, si no lo es, lanza un error
-          throw new Error('Formato de datos incorrecto')
-        }
-
-        setPosts(data)
-      } catch (error) {
-        // Manejar cualquier error que ocurra durante la fetch o el procesamiento de los datos
-        console.error('Error al cargar los posts:', error)
-        setError(error.toString())
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [])
+  const { data: posts, loading, error } = useApi('http://3.129.191.211/api/22944/posts')
 
   if (loading) {
     return <Loading />
@@ -350,26 +344,26 @@ const PostsLoader = () => {
 
   if (error) {
     return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <h1>Error al cargar los posts</h1>
-            </div>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <h1>Error al cargar los posts</h1>
+        </div>
     )
   }
 
-  if (posts.length === 0) {
+  if (!posts || posts.length === 0) {
     return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <h1>No hay posts disponibles</h1>
-            </div>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <h1>No hay posts disponibles</h1>
+        </div>
     )
   }
 
   return (
-        <>
-            {posts.map(post => (
-                <Card key={post.id} post={post} />
-            ))}
-        </>
+      <>
+        {posts.map(post => (
+          <Card key={post.id} post={post} />
+        ))}
+      </>
   )
 }
 
