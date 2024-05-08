@@ -32,6 +32,14 @@ cd Proyecto_Blog_Web
 4. Ejecuta el servidor de desarrollo:
 npm run dev
 
+## Sitio Web
+
+He desarrollado una aplicación web utilizando React y Vite para el frontend y Node.js para el backend, hospedado en servicios de AWS. Actualmente, enfrento un desafío de seguridad debido a que mi backend no está protegido con SSL, ya que no dispongo de un dominio propio. Esto significa que las comunicaciones no están cifradas, lo que requiere que los usuarios desactiven manualmente las protecciones de contenido no seguro en sus navegadores para poder utilizar la aplicación.
+
+
+https://blogcarros.netlify.app/login
+
+
 
 ## Contribuir
 
