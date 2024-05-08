@@ -39,9 +39,9 @@ He desarrollado una aplicación web utilizando React y Vite para el frontend y N
 
 https://blogcarros.netlify.app
 
-##Credenciales para Login
--correo:andyfv08@gmail.com 
--contraseña:Bella
+## Credenciales para Login
+- correo:andyfv08@gmail.com 
+- contraseña:Bella
 
 
 
